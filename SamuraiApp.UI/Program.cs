@@ -13,16 +13,19 @@ namespace SamuraiApp.UI
         {
             _context.Database.EnsureCreated();
             GetSamurais("Before Add:");
-            AddSamurai();
+            AddSamurais("Matthew", "Vasco");
             GetSamurais("After Add:");
             Console.Write("Press Any Key...");
             Console.ReadKey();
         }
 
-        private static void AddSamurai()
+        private static void AddSamurais(params string[] samurais)
         {
-            var newSamurai = new Samurai() { Name = "Sarah" };
-            _context.Add(newSamurai);
+            foreach (var samurai in samurais)
+            {
+                var newSamurai = new Samurai() { Name = samurai };
+                _context.Samurais.Add(newSamurai);
+            }
             _context.SaveChanges();
         }
 
