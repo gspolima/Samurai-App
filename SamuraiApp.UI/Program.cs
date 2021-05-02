@@ -1,4 +1,5 @@
-﻿using SamuraiApp.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SamuraiApp.Data;
 using SamuraiApp.Domain;
 using System;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace SamuraiApp.UI
         {
             _context.Database.EnsureCreated();
             GetSamurais("Before Add:");
-            AddSamurais("Matthew", "Vasco");
+            AddSamurais("Paul");
             GetSamurais("After Add:");
             Console.Write("Press Any Key...");
             Console.ReadKey();
@@ -31,7 +32,9 @@ namespace SamuraiApp.UI
 
         private static void GetSamurais(string message)
         {
-            var samuraiCount = _context.Samurais.Count();
+            var samuraiCount = _context.Samurais
+                .TagWith("ConsoleApp.Program.GetSamurais is asking for a count!")
+                .Count();
             var samurais = _context.Samurais.ToList();
             Console.WriteLine($"{message} {samuraiCount}");
             foreach (var samurai in samurais)
