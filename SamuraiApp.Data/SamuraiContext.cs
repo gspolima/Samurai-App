@@ -2,16 +2,11 @@
 using Microsoft.Extensions.Logging;
 using SamuraiApp.Domain;
 using System;
-using System.IO;
 
 namespace SamuraiApp.Data
 {
     public class SamuraiContext : DbContext
     {
-        private StreamWriter _streamWriter =
-            new StreamWriter(
-                $"{Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\\Log_SamuraiAppData.txt", append: true);
-
         public DbSet<Samurai> Samurais { get; set; }
         public DbSet<Quote> Quotes { get; set; }
         public DbSet<Battle> Battles { get; set; }
@@ -22,7 +17,10 @@ namespace SamuraiApp.Data
             optionsBuilder
                 .UseSqlServer(
                     "Data Source= (localdb)\\MSSQLLocalDB; Initial Catalog=SamuraiAppData")
-                .LogTo(_streamWriter.WriteLine, LogLevel.Debug)
+                .LogTo(
+                    Console.WriteLine,
+                    new[] { DbLoggerCategory.Database.Command.Name },
+                    LogLevel.Information)
                 .EnableSensitiveDataLogging();
         }
 
