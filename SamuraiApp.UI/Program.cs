@@ -2,6 +2,7 @@
 using SamuraiApp.Data;
 using SamuraiApp.Domain;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SamuraiApp.UI
@@ -16,8 +17,9 @@ namespace SamuraiApp.UI
             //AddSamuraisByName("Kojima", "Shinzu", "Yamaha", "Hideo");
             //AddVariousEntities();
             //GetSamurais("After Add:");
-            QueryFilters();
-            QueryAggregators();
+            //QueryFilters();
+            //QueryAggregators();
+            RetrieveMultipleSamuraisAndChange();
             Console.Write("Press Any Key...");
             Console.ReadKey();
         }
@@ -104,6 +106,16 @@ namespace SamuraiApp.UI
             var samuraiById = _context.Samurais.Find(44);
 
             Console.WriteLine($"Id {samuraiById.Id} :: {samuraiById.Name}");
+        }
+
+        public static void RetrieveMultipleSamuraisAndChange()
+        {
+            var idList = new List<int>() { 37, 47, 49, 50 };
+            var samurais = _context.Samurais
+                .Where(s => idList.Contains(s.Id));
+
+            _context.RemoveRange(samurais);
+            _context.SaveChanges();
         }
     }
 }
