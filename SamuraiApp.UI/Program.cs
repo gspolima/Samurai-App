@@ -10,6 +10,7 @@ namespace SamuraiApp.UI
     public class Program
     {
         static SamuraiContext _context = new SamuraiContext();
+        static SamuraiContextNoTracking _contextNT = new SamuraiContextNoTracking();
 
         static void Main(string[] args)
         {
@@ -19,7 +20,8 @@ namespace SamuraiApp.UI
             //GetSamurais("After Add:");
             //QueryFilters();
             //QueryAggregators();
-            RetrieveMultipleSamuraisAndChange();
+            //RetrieveMultipleSamuraisAndDelete();
+            QueryBattlesAndUpdate_Disconnected();
             Console.Write("Press Any Key...");
             Console.ReadKey();
         }
@@ -36,10 +38,10 @@ namespace SamuraiApp.UI
 
         private static void GetSamurais(string message)
         {
-            var samuraiCount = _context.Samurais
+            var samuraiCount = _contextNT.Samurais
                 .TagWith("ConsoleApp.Program.GetSamurais is asking for a count!")
                 .Count();
-            var samurais = _context.Samurais.ToList();
+            var samurais = _contextNT.Samurais.ToList();
             Console.WriteLine($"{message} {samuraiCount}");
             foreach (var samurai in samurais)
             {
@@ -77,11 +79,11 @@ namespace SamuraiApp.UI
 
         public static void QueryFilters()
         {
-            var samurais = _context.Samurais
+            var samurais = _contextNT.Samurais
                 .Where(s => s.Name.Contains("C"));
 
             // table has to be full-text indexed
-            var samuraisEfFunctions = _context.Samurais
+            var samuraisEfFunctions = _contextNT.Samurais
                 .Where(s => EF.Functions.Contains(s.Name, "C%"));
 
             foreach (var samurai in samurais)
@@ -92,30 +94,51 @@ namespace SamuraiApp.UI
 
         public static void QueryAggregators()
         {
-            var samurai = _context.Samurais
+            var samurai = _contextNT.Samurais
                 .FirstOrDefault(s => s.Name.StartsWith("K"));
 
             Console.WriteLine(samurai.Name);
 
-            var lastSamuraiOrderedByName = _context.Samurais
+            var lastSamuraiOrderedByName = _contextNT.Samurais
                 .OrderBy(s => s.Name)
                 .LastOrDefault();
 
             Console.WriteLine(lastSamuraiOrderedByName.Name);
 
-            var samuraiById = _context.Samurais.Find(44);
+            var samuraiById = _contextNT.Samurais.Find(44);
 
             Console.WriteLine($"Id {samuraiById.Id} :: {samuraiById.Name}");
         }
 
-        public static void RetrieveMultipleSamuraisAndChange()
+        public static void RetrieveMultipleSamuraisAndDelete()
         {
             var idList = new List<int>() { 37, 47, 49, 50 };
-            var samurais = _context.Samurais
+            var samurais = _contextNT.Samurais
                 .Where(s => idList.Contains(s.Id));
 
             _context.RemoveRange(samurais);
             _context.SaveChanges();
+        }
+
+        public static void QueryBattlesAndUpdate_Disconnected()
+        {
+            List<Battle> disconnectedBattles;
+            using (var context1 = new SamuraiContextNoTracking())
+            {
+                disconnectedBattles = context1.Battles.ToList();
+            }
+
+            disconnectedBattles.ForEach(b =>
+                {
+                    b.StartDate = new DateTimeOffset(1575, 06, 28, 7, 0, 0, new TimeSpan(9, 0, 0));
+                    b.EndDate = new DateTimeOffset(1570, 07, 30, 10, 0, 0, new TimeSpan(9, 0, 0));
+                });
+
+            using (var context2 = new SamuraiContextNoTracking())
+            {
+                context2.UpdateRange(disconnectedBattles);
+                context2.SaveChanges();
+            }
         }
     }
 }
