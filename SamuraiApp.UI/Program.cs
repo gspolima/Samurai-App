@@ -112,9 +112,15 @@ namespace SamuraiApp.UI
 
         public static void RetrieveMultipleSamuraisAndDelete()
         {
-            var idList = new List<int>() { 37, 47, 49, 50 };
+            var idList = new List<int>() { 43, 51 };
             var samurais = _contextNT.Samurais
-                .Where(s => idList.Contains(s.Id));
+                // join is faster than where(contains())
+                .AsEnumerable()
+                .Join(
+                    inner: idList,
+                    outerKeySelector: s => s.Id,
+                    innerKeySelector: il => il,
+                    (s, il) => s);
 
             _context.RemoveRange(samurais);
             _context.SaveChanges();
