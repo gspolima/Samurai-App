@@ -21,7 +21,11 @@ namespace SamuraiApp.UI
             //QueryFilters();
             //QueryAggregators();
             //RetrieveMultipleSamuraisAndDelete();
-            QueryBattlesAndUpdate_Disconnected();
+            //QueryBattlesAndUpdate_Disconnected();
+            //InsertNewSamuraiWithAQuote();
+            //InsertNewSamuraiWithManyQuotes();
+            //AddQuoteToExistingSamuraiWhileTracked();
+            AddQuoteToExistingSamuraiNotTracked(36);
             Console.Write("Press Any Key...");
             Console.ReadKey();
         }
@@ -145,6 +149,64 @@ namespace SamuraiApp.UI
                 context2.UpdateRange(disconnectedBattles);
                 context2.SaveChanges();
             }
+        }
+
+        public static void InsertNewSamuraiWithAQuote()
+        {
+            var newSamurai = new Samurai()
+            {
+                Name = "Kambei Shimada",
+                Quotes = new List<Quote>()
+                {
+                    new Quote() { Text = "Now that I saved you, will you take me for dinner?" }
+                }
+            };
+
+            _context.Samurais.Add(newSamurai);
+            _context.SaveChanges();
+        }
+
+        public static void InsertNewSamuraiWithManyQuotes()
+        {
+            var newSamurai = new Samurai()
+            {
+                Name = "Kyuzo",
+                Quotes = new List<Quote>()
+                {
+                    new Quote() { Text = "Watch out for my sharp sword!" },
+                    new Quote() { Text = "I told you to watch out! Oh well..." }
+                }
+            };
+
+            _context.Samurais.Add(newSamurai);
+            _context.SaveChanges();
+        }
+
+        public static void AddQuoteToExistingSamuraiWhileTracked()
+        {
+            var samurai = _context.Samurais.Skip(2).FirstOrDefault();
+
+            samurai.Quotes = new List<Quote>()
+            {
+                new Quote() { Text = "Isn't it strange how little we change" }
+            };
+
+            _context.Samurais.Update(samurai);
+            _context.SaveChanges();
+        }
+
+        public static void AddQuoteToExistingSamuraiNotTracked(int samuraiId)
+        {
+            var samurai = _context.Samurais.Find(samuraiId);
+
+            samurai.Quotes = new List<Quote>()
+            {
+                new Quote() { Text = "The attached stars are whispering quietly." }
+            };
+
+            using var newContext = new SamuraiContext();
+            newContext.Attach(samurai);
+            newContext.SaveChanges();
         }
     }
 }
