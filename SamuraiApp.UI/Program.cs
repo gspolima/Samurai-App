@@ -26,7 +26,8 @@ namespace SamuraiApp.UI
             //InsertNewSamuraiWithManyQuotes();
             //AddQuoteToExistingSamuraiWhileTracked();
             //AddQuoteToExistingSamuraiNotTracked(36);
-            EagerLoadSamuraisWithQuotes();
+            //EagerLoadSamuraisWithQuotes();
+            ProjectSamuraisWithQuotes();
             Console.Write("Press Any Key...");
             Console.Read();
         }
@@ -224,6 +225,22 @@ namespace SamuraiApp.UI
                 .Where(s => s.Quotes.Count > 0)
                 .Include(s => s.Battles)
                 .ToList();
+        }
+
+        public static void ProjectSamuraisWithQuotes()
+        {
+            var samuraisProjected = _context.Samurais
+                .Select(s => 
+                    new
+                    {
+                        Samurai = s,
+                        Quotes = s.Quotes.Where(q => q.Text.Contains("are"))
+                    })
+                    .ToList();
+
+            // EF Core is tracking changes to a property in
+            // the anonymous object since it's in the DbContext.
+            var changedSamuraisProjected = samuraisProjected[1].Samurai.Name += " the courageous";
         }
     }
 }
