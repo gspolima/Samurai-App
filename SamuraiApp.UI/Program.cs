@@ -25,9 +25,10 @@ namespace SamuraiApp.UI
             //InsertNewSamuraiWithAQuote();
             //InsertNewSamuraiWithManyQuotes();
             //AddQuoteToExistingSamuraiWhileTracked();
-            AddQuoteToExistingSamuraiNotTracked(36);
+            //AddQuoteToExistingSamuraiNotTracked(36);
+            EagerLoadSamuraisWithQuotes();
             Console.Write("Press Any Key...");
-            Console.ReadKey();
+            Console.Read();
         }
 
         private static void AddSamuraisByName(params string[] samurais)
@@ -204,9 +205,25 @@ namespace SamuraiApp.UI
                 new Quote() { Text = "The attached stars are whispering quietly." }
             };
 
+            // new using syntax with C# 8
             using var newContext = new SamuraiContext();
             newContext.Attach(samurai);
             newContext.SaveChanges();
+        }
+
+        public static void EagerLoadSamuraisWithQuotes()
+        {
+            var samuraisWithFilteredQuotes = _context.Samurais
+                .Include(s => s.Quotes
+                    .Where(q => q.Text
+                        .Contains("change")))
+                .ToList();
+
+            var samuraisWithQuotesAndBattles = _context.Samurais
+                .Include(s => s.Quotes)
+                .Where(s => s.Quotes.Count > 0)
+                .Include(s => s.Battles)
+                .ToList();
         }
     }
 }
