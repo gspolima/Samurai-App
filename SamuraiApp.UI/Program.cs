@@ -27,7 +27,8 @@ namespace SamuraiApp.UI
             //AddQuoteToExistingSamuraiWhileTracked();
             //AddQuoteToExistingSamuraiNotTracked(36);
             //EagerLoadSamuraisWithQuotes();
-            ProjectSamuraisWithQuotes();
+            //ProjectSamuraisWithQuotes();
+            QueryDataUsingInMemoryObjects();
             Console.Write("Press Any Key...");
             Console.Read();
         }
@@ -241,6 +242,20 @@ namespace SamuraiApp.UI
             // EF Core is tracking changes to a property in
             // the anonymous object since it's in the DbContext.
             var changedSamuraisProjected = samuraisProjected[1].Samurai.Name += " the courageous";
+        }
+
+        public static void QueryDataUsingInMemoryObjects()
+        {
+            // to make sure there's a horse in the database
+            var newHorse = new Horse() { Name = "Joergen II", SamuraiId = 52 };
+            _context.Horses.Add(newHorse);
+            _context.SaveChanges();
+            _context.ChangeTracker.Clear();
+            // clears all the entities being tracked.
+
+            var samurai = _context.Samurais.Find(52);
+            _context.Entry(samurai).Reference(s => s.Horse).Load();
+            _context.Entry(samurai).Collection(s => s.Quotes).Load();
         }
     }
 }
