@@ -28,12 +28,15 @@ namespace SamuraiApp.UI
             //AddQuoteToExistingSamuraiNotTracked(36);
             //EagerLoadSamuraisWithQuotes();
             //ProjectSamuraisWithQuotes();
-            QueryDataUsingInMemoryObjects();
+            //QueryDataUsingInMemoryObjects();
+            //FilteringWithRelatedData();
+            //ModifyingRelatedDataWhenTracked();
+            ModifyingRelatedDataWhenNotTracked();
             Console.Write("Press Any Key...");
             Console.Read();
         }
 
-        private static void AddSamuraisByName(params string[] samurais)
+        public static void AddSamuraisByName(params string[] samurais)
         {
             foreach (var samurai in samurais)
             {
@@ -43,7 +46,7 @@ namespace SamuraiApp.UI
             _context.SaveChanges();
         }
 
-        private static void GetSamurais(string message)
+        public static void GetSamurais(string message)
         {
             var samuraiCount = _contextNT.Samurais
                 .TagWith("ConsoleApp.Program.GetSamurais is asking for a count!")
@@ -231,7 +234,7 @@ namespace SamuraiApp.UI
         public static void ProjectSamuraisWithQuotes()
         {
             var samuraisProjected = _context.Samurais
-                .Select(s => 
+                .Select(s =>
                     new
                     {
                         Samurai = s,
@@ -256,6 +259,41 @@ namespace SamuraiApp.UI
             var samurai = _context.Samurais.Find(52);
             _context.Entry(samurai).Reference(s => s.Horse).Load();
             _context.Entry(samurai).Collection(s => s.Quotes).Load();
+        }
+
+        public static void FilteringWithRelatedData()
+        {
+            var swordedSamurai = _context.Samurais
+                .Where(s => s.Quotes
+                    .Any(q => q.Text
+                        .Contains("sword")))
+                .FirstOrDefault();
+        }
+
+        public static void ModifyingRelatedDataWhenTracked()
+        {
+            var samurai = _context.Samurais
+                .Include(s => s.Quotes)
+                .FirstOrDefault(s => s.Id == 36);
+
+            var quote = samurai.Quotes[0].Text += " Thought they are too far away to be heard.";
+
+            _context.SaveChanges();
+        }
+
+        public static void ModifyingRelatedDataWhenNotTracked()
+        {
+            var samurai = _context.Samurais
+                .Include(s => s.Quotes)
+                .FirstOrDefault(s => s.Id == 36);
+
+            var quote = samurai.Quotes[1];
+            quote.Text += " I wonder what they're saying.";
+
+            using var newContext = new SamuraiContext();
+            //newContext.Quotes.Update(quote);
+            newContext.Entry(quote).State = EntityState.Modified;
+            newContext.SaveChanges();
         }
     }
 }
