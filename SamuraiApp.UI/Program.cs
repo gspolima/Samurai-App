@@ -35,7 +35,9 @@ namespace SamuraiApp.UI
             //AddingNewSamuraiToExistingBattle();
             //ReturnBattleWithSamurais();
             //ReturnAllBattlesWithSamurais();
-            AddAllSamuraisToAllBattles();
+            //AddAllSamuraisToAllBattles();
+            RemoveSamuraiFromABattle();
+            //WillNotRemove();
             Console.Write("Press Any Key...");
             Console.Read();
         }
@@ -336,6 +338,34 @@ namespace SamuraiApp.UI
             }
 
             _context.SaveChanges();
+        }
+
+        public static void RemoveSamuraiFromABattle()
+        {
+            var samuraiWithBattle = _context.Samurais
+                .Include(s => s.Battles
+                    .Where(b => b.BattleId == 5))
+                .SingleOrDefault(s => s.Id == 55);
+
+            var battleToRemove = samuraiWithBattle.Battles[0];
+
+            samuraiWithBattle.Battles.Remove(battleToRemove);
+            _context.SaveChanges();
+        }
+
+        public static void WillNotRemove()
+        {
+            var battle = _context.Battles.Find(5);
+            var samurai = _context.Samurais.Find(55);
+
+            /*
+                Won't actually do anything.
+                EF Core needs the whole graph
+                of the relationship loaded 
+                in memory.
+            */
+            battle.Samurais.Remove(samurai);
+            _context.SaveChanges(); 
         }
     }
 }
