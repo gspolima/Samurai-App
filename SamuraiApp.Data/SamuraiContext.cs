@@ -19,8 +19,12 @@ namespace SamuraiApp.Data
                     "Data Source= (localdb)\\MSSQLLocalDB; Initial Catalog=SamuraiAppData")
                 .LogTo(
                     Console.WriteLine,
-                    new[] { DbLoggerCategory.Database.Command.Name },
-                    LogLevel.Information)
+                    new[]
+                    {
+                        DbLoggerCategory.Database.Command.Name,
+                        DbLoggerCategory.Database.Transaction.Name
+                    },
+                    LogLevel.Debug)
                 .EnableSensitiveDataLogging();
         }
 
