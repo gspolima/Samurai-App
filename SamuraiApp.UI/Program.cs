@@ -31,7 +31,11 @@ namespace SamuraiApp.UI
             //QueryDataUsingInMemoryObjects();
             //FilteringWithRelatedData();
             //ModifyingRelatedDataWhenTracked();
-            ModifyingRelatedDataWhenNotTracked();
+            //ModifyingRelatedDataWhenNotTracked();
+            //AddingNewSamuraiToExistingBattle();
+            //ReturnBattleWithSamurais();
+            //ReturnAllBattlesWithSamurais();
+            AddAllSamuraisToAllBattles();
             Console.Write("Press Any Key...");
             Console.Read();
         }
@@ -294,6 +298,44 @@ namespace SamuraiApp.UI
             //newContext.Quotes.Update(quote);
             newContext.Entry(quote).State = EntityState.Modified;
             newContext.SaveChanges();
+        }
+
+        public static void AddingNewSamuraiToExistingBattle()
+        {
+            var battle = _context.Battles
+                .OrderBy(s => s.BattleId)
+                .Last();
+
+            battle.Samurais.Add(new Samurai() { Name = "Yoshiro" });
+
+            _context.SaveChanges();
+        }
+
+        public static void ReturnBattleWithSamurais()
+        {
+            var battle = _context.Battles
+                .Include(b => b.Samurais)
+                .FirstOrDefault();
+        }
+
+        public static void ReturnAllBattlesWithSamurais()
+        {
+            var battles = _context.Battles
+                .Include(b => b.Samurais)
+                .ToList();
+        }
+
+        public static void AddAllSamuraisToAllBattles()
+        {
+            var samurais = _context.Samurais.ToList();
+            var battles = _context.Battles.ToList();
+
+            foreach (var battle in battles)
+            {
+                battle.Samurais.AddRange(samurais);
+            }
+
+            _context.SaveChanges();
         }
     }
 }
