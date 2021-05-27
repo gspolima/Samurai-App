@@ -36,8 +36,9 @@ namespace SamuraiApp.UI
             //ReturnBattleWithSamurais();
             //ReturnAllBattlesWithSamurais();
             //AddAllSamuraisToAllBattles();
-            RemoveSamuraiFromABattle();
+            //RemoveSamuraiFromABattle();
             //WillNotRemove();
+            EditPayloadDataInJoinTable();
             Console.Write("Press Any Key...");
             Console.Read();
         }
@@ -366,6 +367,15 @@ namespace SamuraiApp.UI
             */
             battle.Samurais.Remove(samurai);
             _context.SaveChanges(); 
+        }
+
+        public static void EditPayloadDataInJoinTable()
+        {
+            var row = _context.Set<BattleSamurai>().Find(5, 52);
+            row.DateJoined = DateTime.Now;
+
+            _context.Set<BattleSamurai>().Update(row);
+            _context.SaveChanges();
         }
     }
 }
