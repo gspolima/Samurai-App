@@ -38,7 +38,10 @@ namespace SamuraiApp.UI
             //AddAllSamuraisToAllBattles();
             //RemoveSamuraiFromABattle();
             //WillNotRemove();
-            EditPayloadDataInJoinTable();
+            //EditPayloadDataInJoinTable();
+            //AddSamuraiWithHorse();
+            //AddHorseToExistingSamuraiDisconnected();
+            ReplaceExistingHorseByNewOne();
             Console.Write("Press Any Key...");
             Console.Read();
         }
@@ -375,6 +378,38 @@ namespace SamuraiApp.UI
             row.DateJoined = DateTime.Now;
 
             _context.Set<BattleSamurai>().Update(row);
+            _context.SaveChanges();
+        }
+
+        public static void AddSamuraiWithHorse()
+        {
+            var newSamurai = new Samurai()
+            { 
+                Name = "Tisun",
+                Horse = new Horse() { Name = "Joergen V" }
+            };
+
+            _context.Samurais.Add(newSamurai);
+            _context.SaveChanges();
+        }
+
+        public static void AddHorseToExistingSamuraiDisconnected()
+        {
+            var samurai = _context.Samurais.Find(48);
+            samurai.Horse = new Horse() { Name = "Mr. WonkyWalking" };
+
+            using var newContext = new SamuraiContext();
+            newContext.Samurais.Attach(samurai);
+            newContext.SaveChanges();
+        }
+
+        public static void ReplaceExistingHorseByNewOne()
+        {
+            var samurai = _context.Samurais
+                .Include(s => s.Horse)
+                .SingleOrDefault(s => s.Id == 35);
+            samurai.Horse = new Horse() { Name = "Sven" };
+
             _context.SaveChanges();
         }
     }
