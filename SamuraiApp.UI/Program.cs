@@ -14,7 +14,10 @@ namespace SamuraiApp.UI
 
         static void Main(string[] args)
         {
-            QuerySamuraiBattleStats();
+            //QuerySamuraiBattleStats();
+            //QueryDataWithRawSql();
+            //QueryRelatedDataWithRawSql();
+            QueryDataWithInterpolatedString("Kambei Shimada");
             Console.Write("Press Any Key...");
             Console.Read();
         }
@@ -23,13 +26,41 @@ namespace SamuraiApp.UI
         {
             var stats = _context.SamuraiBattleStats.ToList();
             var firstSamurai = _context.SamuraiBattleStats.FirstOrDefault();
-            
+
             /*
                 Although the compiler is happy, it will 
                 throw an exception because Find() doesn't
                 work with keyless entities.
             */
-            //var findOneSamurai = _context.SamuraiBattleStats.Find(55);
+            // var findOneSamurai = _context.SamuraiBattleStats.Find(55);
+        }
+
+        public static void QueryDataWithRawSql()
+        {
+            var samurais = _context.Samurais
+                .FromSqlRaw("SELECT * FROM SAMURAIS")
+                .ToList();
+        }
+
+        public static void QueryRelatedDataWithRawSql()
+        {
+            var samuraisWithQuotes = _context.Samurais
+                .FromSqlRaw("SELECT ID, NAME FROM SAMURAIS")
+                .Include(s => s.Quotes)
+                .Include(s => s.Horse)
+                .ToList();
+        }
+
+        public static void QueryDataWithInterpolatedString(string samuraiName)
+        {
+
+            /*
+                Not using the interpolated version for
+                raw SQL may expose the database to SQL Injections.
+            */
+            var samurai = _context.Samurais
+                .FromSqlInterpolated($"SELECT * FROM SAMURAIS WHERE NAME = {samuraiName}")
+                .ToList();
         }
     }
 }
