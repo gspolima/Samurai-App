@@ -42,7 +42,7 @@ namespace SamuraiApp.Data
 
             modelBuilder.Entity<SamuraiBattleStats>()
                 .HasNoKey()
-                .ToView("[dbo].[SamuraiBattleStats]");
+                .ToView("SamuraiBattleStats");
         }
     }
 }

@@ -14,8 +14,22 @@ namespace SamuraiApp.UI
 
         static void Main(string[] args)
         {
+            QuerySamuraiBattleStats();
             Console.Write("Press Any Key...");
             Console.Read();
+        }
+
+        public static void QuerySamuraiBattleStats()
+        {
+            var stats = _context.SamuraiBattleStats.ToList();
+            var firstSamurai = _context.SamuraiBattleStats.FirstOrDefault();
+            
+            /*
+                Although the compiler is happy, it will 
+                throw an exception because Find() doesn't
+                work with keyless entities.
+            */
+            //var findOneSamurai = _context.SamuraiBattleStats.Find(55);
         }
     }
 }
