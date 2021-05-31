@@ -17,7 +17,9 @@ namespace SamuraiApp.UI
             //QuerySamuraiBattleStats();
             //QueryDataWithRawSql();
             //QueryRelatedDataWithRawSql();
-            QueryDataWithInterpolatedString("Kambei Shimada");
+            //QueryDataWithInterpolatedString("Kambei Shimada");
+            //CallStoredProceduresWithRawSql("scream");
+            RunNonQueryingOperationWithRawSql(52);
             Console.Write("Press Any Key...");
             Console.Read();
         }
@@ -62,5 +64,19 @@ namespace SamuraiApp.UI
                 .FromSqlInterpolated($"SELECT * FROM SAMURAIS WHERE NAME = {samuraiName}")
                 .ToList();
         }
+
+        public static void CallStoredProceduresWithRawSql(string searchTerm)
+        {
+            var samurais = _context.Samurais
+                .FromSqlInterpolated($"EXEC SamuraisWhoSaidAWord {searchTerm}")
+                .ToList();
+        }
+
+        public static void RunNonQueryingOperationWithRawSql(int samuraiId)
+        {
+            var deleteSamurai = _context.Database
+                .ExecuteSqlInterpolated($"EXEC DeleteQuotesForSamurai {samuraiId}");
+        }
+
     }
 }
