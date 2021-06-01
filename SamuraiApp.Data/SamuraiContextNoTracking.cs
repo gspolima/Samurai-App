@@ -4,7 +4,7 @@ namespace SamuraiApp.Data
 {
     public class SamuraiContextNoTracking : SamuraiContext
     {
-        public SamuraiContextNoTracking()
+        public SamuraiContextNoTracking(DbContextOptions<SamuraiContext> options) : base(options)
         {
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }

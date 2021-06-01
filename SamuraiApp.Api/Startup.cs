@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,8 +28,12 @@ namespace SamuraiApp.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // TODO: ADD THE DBCONTEXT HERE
             services.AddControllers();
+            services.AddDbContext<SamuraiContext>(options  =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("SamuraiConnection"))
+                .EnableSensitiveDataLogging()
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SamuraiApp.Api", Version = "v1" });
