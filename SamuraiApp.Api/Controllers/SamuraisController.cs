@@ -39,6 +39,16 @@ namespace SamuraiApp.Api
             return samurai;
         }
 
+        [HttpGet("said/{word}")]
+        public ActionResult<List<Samurai>> SamuraisWhoSaidAGivenWord(string word)
+        {
+            var samurais = _context.Samurais
+                .FromSqlInterpolated($"EXEC SamuraisWhoSaidAWord {word}")
+                .ToList();
+
+            return Ok(samurais);
+        }
+
         [HttpPost]
         public ActionResult CreateNewSamurai(Samurai samurai)
         {
@@ -54,8 +64,8 @@ namespace SamuraiApp.Api
         {
             if (id != samurai.Id)
             {
-                return BadRequest(new BadRequestObjectResult(
-                    "The ID passed in the URI differs from the Samurai ID"));
+                return BadRequest(
+                    "The ID passed in the URI differs from the ID passed in the request body");
             }
 
             _context.Entry(samurai).State = EntityState.Modified;
