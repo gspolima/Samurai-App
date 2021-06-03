@@ -49,12 +49,13 @@ namespace SamuraiApp.Api
         }
 
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public ActionResult UpdateSamurai(int id, Samurai samurai)
         {
             if (id != samurai.Id)
             {
-                return BadRequest();
+                return BadRequest(new BadRequestObjectResult(
+                    "The ID passed in the URI differs from the Samurai ID"));
             }
 
             _context.Entry(samurai).State = EntityState.Modified;
@@ -77,6 +78,15 @@ namespace SamuraiApp.Api
             _context.SaveChanges();
 
             return NoContent();
+        }
+
+        [HttpDelete("sproc/{id}")]
+        public ActionResult DeleteQuotesForSamurai(int id)
+        {
+            var rowsAffected = _context.Database
+                .ExecuteSqlInterpolated($"EXEC DeleteQuotesForSamurai {id}");
+
+            return Ok($"{rowsAffected} quotes deleted");
         }
     }
 }
