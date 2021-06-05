@@ -49,7 +49,8 @@ namespace SamuraiApp.Api
 
             if (quotes.Count == 0)
             {
-                return NotFound("There are no quotes for this samurai");
+                return NotFound(
+                    "There are no quotes for this samurai");
             }
 
             return Ok(quotes);
@@ -71,7 +72,8 @@ namespace SamuraiApp.Api
             var samurais = _context.Samurais.Count();
             var samuraisWithNoQuotes = samurais - samuraisWithQuotes;
 
-            return Ok($"{samuraisWithNoQuotes} Samurais have no recorded quotes");
+            return Ok(
+                $"{samuraisWithNoQuotes} Samurais have no recorded quotes");
         }
 
         [HttpPost]
@@ -80,7 +82,8 @@ namespace SamuraiApp.Api
             _context.Quotes.Add(quote);
             _context.SaveChanges();
 
-            return CreatedAtAction("GetQuoteById", new { id = quote.Id }, quote );
+            return CreatedAtAction(
+                "GetQuoteById", new { id = quote.Id }, quote );
         }
 
         [HttpPut("{id}")]
@@ -91,7 +94,25 @@ namespace SamuraiApp.Api
                 return BadRequest(
                     "The ID passed in the URI differs from the ID passed in the request body");
             }
-            _context.Entry(quote).State = EntityState.Modified;
+
+            if (quote.SamuraiIdHasValue == false)
+            {
+                _context.Attach(quote);
+                _context.Entry(quote).Property(q => q.Text).IsModified = true;
+                _context.SaveChanges();
+                return NoContent();
+            }
+
+            return BadRequest(
+                "This resource does not allow change of the samurai who said a quote.");
+        }
+
+        [HttpPut("{id}/{newSamuraiId}")]
+        public ActionResult UpdateSamuraiWhoSaidQuote(int id, int newSamuraiId)
+        {
+            var quote = _context.Quotes.Find(id);
+            _context.Attach(quote);
+            quote.SamuraiId = newSamuraiId;
             _context.SaveChanges();
 
             return NoContent();
