@@ -18,7 +18,7 @@
             }
         }
 
-        public bool HasValue => _hasValue;
+        public bool SamuraiIdHasValue => _hasValue;
 
         private int _samuraiId;
         private bool _hasValue;

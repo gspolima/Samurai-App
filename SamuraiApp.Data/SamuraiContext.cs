@@ -31,7 +31,7 @@ namespace SamuraiApp.Data
                 .ToView("SamuraiBattleStats");
 
             modelBuilder.Entity<Quote>()
-                .Ignore(q => q.HasValue);
+                .Ignore(q => q.SamuraiIdHasValue);
         }
     }
 }
