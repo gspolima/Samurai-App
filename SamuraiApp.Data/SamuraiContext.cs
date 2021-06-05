@@ -29,6 +29,9 @@ namespace SamuraiApp.Data
             modelBuilder.Entity<SamuraiBattleStats>()
                 .HasNoKey()
                 .ToView("SamuraiBattleStats");
+
+            modelBuilder.Entity<Quote>()
+                .Ignore(q => q.HasValue);
         }
     }
 }
