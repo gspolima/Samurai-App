@@ -133,5 +133,29 @@ namespace SamuraiApp.Api
 
             return NoContent();
         }
+
+        [HttpDelete]
+        public ActionResult DeleteMultipleQuotes(List<int> quoteIDs)
+        {
+            var selectedQuotes = _context.Quotes
+                .AsEnumerable()
+                .Join(
+                    quoteIDs,
+                    q => q.Id,
+                    qi => qi,
+                    (q, qi) => q)
+                .ToList();
+
+            if(selectedQuotes == null)
+                return NotFound("None of the quote IDs specified exist.");
+            
+            if (quoteIDs.Count > selectedQuotes.Count)
+                return BadRequest("Not all quote IDs specified exist.");
+
+            _context.Quotes.RemoveRange(selectedQuotes);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
     }
 }
