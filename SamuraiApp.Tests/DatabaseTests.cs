@@ -1,8 +1,8 @@
 using System;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
-using SamuraiApp.Data;
 using SamuraiApp.Domain;
+using SamuraiApp.Data;
 using System.Diagnostics;
 
 namespace SamuraiApp.Tests
@@ -18,9 +18,9 @@ namespace SamuraiApp.Tests
 
             var samurai = new Samurai() { Name = "Test" };
             context.Samurais.Add(samurai);
-            Debug.WriteLine($"{samurai.Id} before SaveChanges");
+            Debug.WriteLine($"[SQL Server] {samurai.Id} before SaveChanges");
             context.SaveChanges();
-            Debug.WriteLine($"{samurai.Id} after SaveChanges");
+            Debug.WriteLine($"[SQL Server] {samurai.Id} after SaveChanges");
 
             Assert.NotEqual(0, samurai.Id);
         }
