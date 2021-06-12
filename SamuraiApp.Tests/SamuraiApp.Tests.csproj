@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SamuraiApp.Data\SamuraiApp.Data.csproj" />
     <ProjectReference Include="..\SamuraiApp.Domain\SamuraiApp.Domain.csproj" />
+    <ProjectReference Include="..\SamuraiApp.UI\SamuraiApp.UI.csproj" />
   </ItemGroup>
 
 </Project>
