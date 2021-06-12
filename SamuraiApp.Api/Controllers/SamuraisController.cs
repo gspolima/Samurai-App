@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SamuraiApp.Data;
 using SamuraiApp.Domain;
 
 namespace SamuraiApp.Api
@@ -11,81 +9,74 @@ namespace SamuraiApp.Api
     [ApiController]
     public class SamuraisController : ControllerBase
     {
-        private readonly SamuraiContext _context;
+        private readonly BusinessLogicData _bizLogic;
 
-        public SamuraisController(SamuraiContext context)
+        public SamuraisController(BusinessLogicData bizLogic)
         {
-            _context = context;
+            _bizLogic = bizLogic;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Samurai>> GetSamurais()
+        public async Task<ActionResult<IEnumerable<Samurai>>> GetSamurais()
         {
-            var samurais = _context.Samurais.ToList();
-
-            return samurais;
+            var samurais = await _bizLogic.GetAllSamurais();
+            return Ok(samurais);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Samurai> GetSamuraiById(int id)
+        public async Task<ActionResult<Samurai>> GetSamurai(int id)
         {
-            var samurai = _context.Samurais.Find(id);
+            var samurai = await _bizLogic.GetSamuraiById(id);
 
             if (samurai == null)
             {
                 return NotFound();
             }
 
-            return samurai;
+            return Ok(samurai);
         }
 
         [HttpGet("said/{word}")]
-        public ActionResult<List<Samurai>> SamuraisWhoSaidAGivenWord(string word)
+        public async Task<ActionResult<List<Samurai>>> SamuraisWhoSaidAGivenWord(string word)
         {
-            var samurais = _context.Samurais
-                .FromSqlInterpolated($"EXEC SamuraisWhoSaidAWord {word}")
-                .ToList();
-
+            var samurais = await _bizLogic.GetSamuraisBySaidWord(word);
+            if (samurais.Count == 0)
+            {
+                return NotFound("No samurai have ever said the given word");
+            }
             return Ok(samurais);
         }
 
         [HttpPost]
-        public ActionResult CreateNewSamurai(Samurai samurai)
+        public async Task<ActionResult> Create(Samurai samurai)
         {
-            _context.Samurais.Add(samurai);
-            _context.SaveChanges();
-
+            await _bizLogic.AddSamurai(samurai);
             return CreatedAtAction("GetSamurais", new { id = samurai.Id }, samurai);
         }
 
 
         [HttpPut("{id}")]
-        public ActionResult UpdateSamurai(int id, Samurai samurai)
+        public async Task<ActionResult> Update(int id, Samurai samurai)
         {
             if (id != samurai.Id)
             {
                 return BadRequest(
                     "The ID passed in the URI differs from the ID passed in the request body");
             }
-
-            _context.Entry(samurai).State = EntityState.Modified;
-            _context.SaveChanges();
+            await _bizLogic.UpdateWholeSamurai(samurai);
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteSamurai(int id)
-        {
-            var samurai = _context.Samurais.Find(id);
-            
+        public async Task<ActionResult> Delete(int id)
+        {   
+            var samurai = await _bizLogic.GetSamuraiById(id);
             if (samurai == null)
             {
                 return NotFound();
             }
-
-            _context.Samurais.Remove(samurai);
-            _context.SaveChanges();
+            await _bizLogic.DeleteSamurai(samurai);
 
             return NoContent();
         }
@@ -93,10 +84,9 @@ namespace SamuraiApp.Api
         [HttpDelete("sproc/{id}")]
         public ActionResult DeleteQuotesForSamurai(int id)
         {
-            var rowsAffected = _context.Database
-                .ExecuteSqlInterpolated($"EXEC DeleteQuotesForSamurai {id}");
+            var deletedQuotesCount = _bizLogic.DeleteAllQuotesBySamuraiId(id);
 
-            return Ok($"{rowsAffected} quotes deleted");
+            return Ok($"{deletedQuotesCount} quotes deleted");
         }
     }
 }
