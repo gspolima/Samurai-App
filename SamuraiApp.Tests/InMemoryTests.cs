@@ -17,7 +17,8 @@ namespace SamuraiApp.Tests
         {
             var samurai = new Samurai() { Name = "Test" };
 
-            var context = CreateNewInMemoryInstance("CanInsertSamurai");
+            var inMemoryDB = new InMemoryInstanceFactory();
+            var context = inMemoryDB.CreateNewInstance("CanInsertSamurai");
             context.Samurais.Add(samurai);
 
             Assert.Equal(EntityState.Added, context.Entry(samurai).State);
@@ -30,7 +31,8 @@ namespace SamuraiApp.Tests
         [Fact]
         public void CanAddSamuraisByName()
         {
-            var context = CreateNewInMemoryInstance("CanAddSamuraisByName");
+            var inMemoryDB = new InMemoryInstanceFactory();
+            var context = inMemoryDB.CreateNewInstance("CanAddSamuraisByName");
             var bizLogic = new BizLogicData(context);
 
             var actual = bizLogic.AddNewSamuraisByName(
@@ -42,7 +44,8 @@ namespace SamuraiApp.Tests
         [Fact]
         public void CanAddSingleSamurai()
         {
-            var context = CreateNewInMemoryInstance("CanAddSingleSamurai");
+            var inMemoryDB = new InMemoryInstanceFactory();
+            var context = inMemoryDB.CreateNewInstance("CanAddSingleSamurai");
             var bizLogic = new BizLogicData(context);
 
             var actual = bizLogic.InsertNewSamurai(new Samurai());
@@ -65,7 +68,8 @@ namespace SamuraiApp.Tests
                 }
             };
 
-            var context = CreateNewInMemoryInstance("CanInsertSamuraiWithQuotes");
+            var inMemoryDB = new InMemoryInstanceFactory();
+            var context = inMemoryDB.CreateNewInstance("CanInsertSamuraiWithQuotes");
             var bizData = new BizLogicData(context);
 
             bizData.InsertNewSamurai(samurai);
@@ -91,20 +95,14 @@ namespace SamuraiApp.Tests
                 }
             };
 
-            var context = CreateNewInMemoryInstance("CanGetSamuraisWithQuotes");
+            var inMemoryDB = new InMemoryInstanceFactory();
+            var context = inMemoryDB.CreateNewInstance("CanGetSamuraisWithQuotes");
             var bizLogic = new BizLogicData(context);
             bizLogic.InsertNewSamurai(samurai);
 
             var samuraiWithQuotes = bizLogic.GetSamuraiWithQuotes(samurai.Id);
 
             Assert.Equal(2, samuraiWithQuotes.Quotes.Count);
-        }
-
-        private static SamuraiContext CreateNewInMemoryInstance(string instanceName)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder();
-            optionsBuilder.UseInMemoryDatabase(instanceName);
-            return new SamuraiContext(optionsBuilder.Options);
         }
     }
 }

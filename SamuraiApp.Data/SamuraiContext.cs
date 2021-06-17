@@ -8,18 +8,15 @@ namespace SamuraiApp.Data
         public SamuraiContext()
         { }
 
-        public SamuraiContext(DbContextOptions options) : base(options)
-        {
-            
-        }
-
         public SamuraiContext(DbContextOptions<SamuraiContext> options) : base(options)
-        {
-        }
+        { }
+
+        public SamuraiContext(DbContextOptionsBuilder options)
+        { }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if(!optionsBuilder.IsConfigured)
+            if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer(
                     "Data Source= (localdb)\\MSSQLLocalDB;Initial Catalog=SamuraiTestData");
