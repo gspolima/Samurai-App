@@ -1,66 +1,83 @@
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SamuraiApp.Api.Models;
 using SamuraiApp.Data;
 using SamuraiApp.Domain;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SamuraiApp.Api
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/samurai/{samuraiId}/quotes")]
     public class QuotesController : ControllerBase
     {
-        private readonly SamuraiContext _context;
+        private readonly SamuraiContext context;
 
         public QuotesController(SamuraiContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         [HttpGet]
-        public ActionResult<List<Quote>> GetQuotes()
+        public ActionResult<List<Quote>> GetQuotes(int samuraiId)
         {
-            var quotes = _context.Quotes.ToList();
-            
-            return Ok(quotes);
+            var samurai = context.Samurais
+                .Include(s => s.Quotes)
+                .SingleOrDefault(s => s.Id == samuraiId);
+
+            if (samurai == null)
+                return NotFound("Samurai not found");
+
+            var quotesToReturn = new List<QuoteDto>();
+
+            foreach (var quote in samurai.Quotes)
+            {
+                quotesToReturn.Add(
+                    new QuoteDto()
+                    {
+                        Id = quote.Id,
+                        Text = quote.Text,
+                        SamuraiId = quote.SamuraiId
+                    });
+            }
+
+            return Ok(quotesToReturn);
         }
 
 
-        [HttpGet("{id}")]
-        public ActionResult<Quote> GetQuoteById(int id)
+        [HttpGet("{id}", Name = "GetQuoteById")]
+        public ActionResult<Quote> GetQuoteById(int samuraiId, int id)
         {
-            var quote = _context.Quotes.Find(id);
+            var samurai = context.Samurais
+                .Include(s => s.Quotes)
+                .SingleOrDefault(s => s.Id == samuraiId);
 
-            if (quote == null)
+            if (samurai == null)
+                return NotFound("Samurai not found");
+
+            var quoteFromDB = samurai.Quotes.SingleOrDefault(q => q.Id == id);
+
+            if (quoteFromDB == null)
             {
                 return NotFound();
             }
 
+            var quote = new QuoteDto()
+            {
+                Id = quoteFromDB.Id,
+                Text = quoteFromDB.Text,
+                SamuraiId = quoteFromDB.SamuraiId
+            };
+
             return Ok(quote);
         }
 
-        [HttpGet("samurai/{id}")]
-        public ActionResult<List<Quote>> QuotesBySamurai(int id)
-        {
-            var quotes = _context.Quotes
-                .Where(q => q.SamuraiId == id)
-                .ToList();
-
-            if (quotes.Count == 0)
-            {
-                return NotFound(
-                    "There are no quotes for this samurai");
-            }
-
-            return Ok(quotes);
-        }
-
-        [HttpGet("samurai/noquote")]
+        [HttpGet("/noquote")]
         public ActionResult SamuraisWithNoQuote()
         {
-            var quotes = _context.Quotes.ToList();
-            var samuraisWithQuotes = _context.Samurais
+            var quotes = context.Quotes.ToArray();
+            var samuraisWithQuotes = context.Samurais
                 .AsEnumerable()
                 .Join(
                     quotes,
@@ -69,7 +86,7 @@ namespace SamuraiApp.Api
                     (s, q) => new { SamuraiId = s.Id })
                 .Count();
 
-            var samurais = _context.Samurais.Count();
+            var samurais = context.Samurais.Count();
             var samuraisWithNoQuotes = samurais - samuraisWithQuotes;
 
             return Ok(
@@ -77,13 +94,36 @@ namespace SamuraiApp.Api
         }
 
         [HttpPost]
-        public ActionResult CreateNewQuote(Quote quote)
+        public ActionResult CreateNewQuote(int samuraiId, [FromBody] QuoteForCreationDto quote)
         {
-            _context.Quotes.Add(quote);
-            _context.SaveChanges();
+            if (string.IsNullOrEmpty(quote.Text))
+                return BadRequest($"Property [{nameof(quote.Text)}] must have a value");
+
+            var samurai = context.Samurais.Find(samuraiId);
+
+            if (samurai == null)
+                return NotFound("Samurai not found");
+
+            var newQuote = new Quote()
+            {
+                Text = quote.Text,
+                SamuraiId = samurai.Id
+            };
+
+            context.Quotes.Add(newQuote);
+            context.SaveChanges();
+
+            var quoteDto = new QuoteDto()
+            {
+                Id = newQuote.Id,
+                Text = newQuote.Text,
+                SamuraiId = newQuote.SamuraiId
+            };
 
             return CreatedAtAction(
-                "GetQuoteById", new { id = quote.Id }, quote );
+                "GetQuoteById",
+                new { samuraiId = quoteDto.SamuraiId, id = quoteDto.Id },
+                quoteDto);
         }
 
         [HttpPut("{id}")]
@@ -97,9 +137,9 @@ namespace SamuraiApp.Api
 
             if (quote.SamuraiIdHasValue == false)
             {
-                _context.Attach(quote);
-                _context.Entry(quote).Property(q => q.Text).IsModified = true;
-                _context.SaveChanges();
+                context.Attach(quote);
+                context.Entry(quote).Property(q => q.Text).IsModified = true;
+                context.SaveChanges();
                 return NoContent();
             }
 
@@ -110,10 +150,10 @@ namespace SamuraiApp.Api
         [HttpPut("{id}/{newSamuraiId}")]
         public ActionResult UpdateSamuraiWhoSaidQuote(int id, int newSamuraiId)
         {
-            var quote = _context.Quotes.Find(id);
-            _context.Attach(quote);
+            var quote = context.Quotes.Find(id);
+            context.Attach(quote);
             quote.SamuraiId = newSamuraiId;
-            _context.SaveChanges();
+            context.SaveChanges();
 
             return NoContent();
         }
@@ -121,15 +161,15 @@ namespace SamuraiApp.Api
         [HttpDelete("{id}")]
         public ActionResult DeleteQuote(int id)
         {
-            var quote = _context.Quotes.Find(id);
+            var quote = context.Quotes.Find(id);
 
             if (quote == null)
             {
                 return NotFound();
             }
 
-            _context.Quotes.Remove(quote);
-            _context.SaveChanges();
+            context.Quotes.Remove(quote);
+            context.SaveChanges();
 
             return NoContent();
         }
@@ -137,7 +177,7 @@ namespace SamuraiApp.Api
         [HttpDelete]
         public ActionResult DeleteMultipleQuotes(List<int> quoteIDs)
         {
-            var selectedQuotes = _context.Quotes
+            var selectedQuotes = context.Quotes
                 .AsEnumerable()
                 .Join(
                     quoteIDs,
@@ -146,14 +186,14 @@ namespace SamuraiApp.Api
                     (q, qi) => q)
                 .ToList();
 
-            if(selectedQuotes == null)
+            if (selectedQuotes == null)
                 return NotFound("None of the quote IDs specified exist.");
-            
+
             if (quoteIDs.Count > selectedQuotes.Count)
                 return BadRequest("Not all quote IDs specified exist.");
 
-            _context.Quotes.RemoveRange(selectedQuotes);
-            _context.SaveChanges();
+            context.Quotes.RemoveRange(selectedQuotes);
+            context.SaveChanges();
 
             return NoContent();
         }
