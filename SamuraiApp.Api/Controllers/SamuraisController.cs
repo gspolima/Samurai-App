@@ -1,32 +1,33 @@
+using Microsoft.AspNetCore.Mvc;
+using SamuraiApp.Api.Services;
+using SamuraiApp.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using SamuraiApp.Domain;
 
 namespace SamuraiApp.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/samurais/")]
     [ApiController]
     public class SamuraisController : ControllerBase
     {
-        private readonly BusinessLogicData _bizLogic;
+        private readonly SamuraiService service;
 
-        public SamuraisController(BusinessLogicData bizLogic)
+        public SamuraisController(SamuraiService service)
         {
-            _bizLogic = bizLogic;
+            this.service = service;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Samurai>>> GetSamurais()
         {
-            var samurais = await _bizLogic.GetAllSamurais();
+            var samurais = await service.GetSamurais();
             return Ok(samurais);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Samurai>> GetSamurai(int id)
+        public async Task<ActionResult<Samurai>> GetSamuraiById(int id)
         {
-            var samurai = await _bizLogic.GetSamuraiById(id);
+            var samurai = await service.GetSamuraiById(id);
 
             if (samurai == null)
             {
@@ -36,10 +37,16 @@ namespace SamuraiApp.Api
             return Ok(samurai);
         }
 
+        [HttpGet("noquote")]
+        public ActionResult SamuraisWithNoQuote()
+        {
+            return NotFound("Resource temporarily removed...");
+        }
+
         [HttpGet("said/{word}")]
         public async Task<ActionResult<List<Samurai>>> SamuraisWhoSaidAGivenWord(string word)
         {
-            var samurais = await _bizLogic.GetSamuraisBySaidWord(word);
+            var samurais = await service.GetSamuraisByWordSpoken(word);
             if (samurais.Count == 0)
             {
                 return NotFound("No samurai have ever said the given word");
@@ -48,45 +55,44 @@ namespace SamuraiApp.Api
         }
 
         [HttpPost]
-        public async Task<ActionResult> Create(Samurai samurai)
+        public async Task<IActionResult> Create([FromBody] Samurai samurai)
         {
-            await _bizLogic.AddSamurai(samurai);
+            await service.CreateNewSamurai(samurai);
             return CreatedAtAction("GetSamurais", new { id = samurai.Id }, samurai);
         }
 
-
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, Samurai samurai)
+        public async Task<IActionResult> Update(int id, Samurai samurai)
         {
             if (id != samurai.Id)
             {
                 return BadRequest(
                     "The ID passed in the URI differs from the ID passed in the request body");
             }
-            await _bizLogic.UpdateWholeSamurai(samurai);
+            await service.UpdateWholeSamuraiAsync(samurai);
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
-        {   
-            var samurai = await _bizLogic.GetSamuraiById(id);
+        public async Task<IActionResult> Delete(int id)
+        {
+            var samurai = await service.GetSamuraiById(id);
             if (samurai == null)
             {
                 return NotFound();
             }
-            await _bizLogic.DeleteSamurai(samurai);
+            await service.RemoveSamurai(samurai);
 
             return NoContent();
         }
 
         [HttpDelete("sproc/{id}")]
-        public ActionResult DeleteQuotesForSamurai(int id)
+        public IActionResult DeleteQuotesForSamurai(int id)
         {
-            var deletedQuotesCount = _bizLogic.DeleteAllQuotesBySamuraiId(id);
+            var deletedQuotesCount = service.DeleteQuotesBySamuraiId(id);
 
-            return Ok($"{deletedQuotesCount} quotes deleted");
+            return Ok($"{deletedQuotesCount} quotes deleted for samurai ID:{id}");
         }
     }
 }

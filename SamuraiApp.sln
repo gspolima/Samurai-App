@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamuraiApp.Domain", "Samura
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamuraiApp.Data", "SamuraiApp.Data\SamuraiApp.Data.csproj", "{D2B6AC50-E909-4047-A636-79163B66FD7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamuraiApp.Api", "SamuraiApp.Api\SamuraiApp.Api.csproj", "{2C64BBA5-B604-486B-9152-F32057D3C6BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamuraiApp.Api", "SamuraiApp.Api\SamuraiApp.Api.csproj", "{2C64BBA5-B604-486B-9152-F32057D3C6BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamuraiApp.Tests", "SamuraiApp.Tests\SamuraiApp.Tests.csproj", "{7A6E19CF-2C57-45DD-AF9D-35FB2F0DA64C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamuraiApp.Tests", "SamuraiApp.Tests\SamuraiApp.Tests.csproj", "{7A6E19CF-2C57-45DD-AF9D-35FB2F0DA64C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamuraiApp.UI", "SamuraiApp.UI\SamuraiApp.UI.csproj", "{F17CAB3E-A0ED-497A-9570-C12CD8DE40A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SamuraiApp.UI", "SamuraiApp.UI\SamuraiApp.UI.csproj", "{F17CAB3E-A0ED-497A-9570-C12CD8DE40A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

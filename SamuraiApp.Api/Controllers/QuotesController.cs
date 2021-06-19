@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SamuraiApp.Api.Models;
+using SamuraiApp.Api.Dtos;
 using SamuraiApp.Data;
 using SamuraiApp.Domain;
 using System.Collections.Generic;
@@ -50,18 +50,17 @@ namespace SamuraiApp.Api
         public ActionResult<Quote> GetQuoteById(int samuraiId, int id)
         {
             var samurai = context.Samurais
-                .Include(s => s.Quotes)
+                .Include(s => s.Quotes.Where(q => q.Id == id))
                 .SingleOrDefault(s => s.Id == samuraiId);
 
             if (samurai == null)
-                return NotFound("Samurai not found");
+                return NotFound("Samurai ID not found");
 
-            var quoteFromDB = samurai.Quotes.SingleOrDefault(q => q.Id == id);
+            if (samurai.Quotes.Count == 0)
+                return NotFound("Quote ID not found");
 
-            if (quoteFromDB == null)
-            {
-                return NotFound();
-            }
+            var quoteFromDB = samurai.Quotes
+                .SingleOrDefault(q => q.Id == id);
 
             var quote = new QuoteDto()
             {
@@ -73,28 +72,11 @@ namespace SamuraiApp.Api
             return Ok(quote);
         }
 
-        [HttpGet("/noquote")]
-        public ActionResult SamuraisWithNoQuote()
-        {
-            var quotes = context.Quotes.ToArray();
-            var samuraisWithQuotes = context.Samurais
-                .AsEnumerable()
-                .Join(
-                    quotes,
-                    s => s.Id,
-                    q => q.SamuraiId,
-                    (s, q) => new { SamuraiId = s.Id })
-                .Count();
 
-            var samurais = context.Samurais.Count();
-            var samuraisWithNoQuotes = samurais - samuraisWithQuotes;
-
-            return Ok(
-                $"{samuraisWithNoQuotes} Samurais have no recorded quotes");
-        }
 
         [HttpPost]
-        public ActionResult CreateNewQuote(int samuraiId, [FromBody] QuoteForCreationDto quote)
+        public ActionResult CreateNewQuote(
+            int samuraiId, [FromBody] QuoteForCreationDto quote)
         {
             if (string.IsNullOrEmpty(quote.Text))
                 return BadRequest($"Property [{nameof(quote.Text)}] must have a value");
@@ -102,7 +84,7 @@ namespace SamuraiApp.Api
             var samurai = context.Samurais.Find(samuraiId);
 
             if (samurai == null)
-                return NotFound("Samurai not found");
+                return NotFound("Samurai ID not found");
 
             var newQuote = new Quote()
             {
@@ -127,46 +109,53 @@ namespace SamuraiApp.Api
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateQuoteText(int id, Quote quote)
+        public ActionResult UpdateWholeQuote(
+            int samuraiId, int id, [FromBody] QuoteForUpdateDto quote)
         {
-            if (id != quote.Id)
+            var samurai = context.Samurais
+                .Include(s => s.Quotes.Where(q => q.Id == id))
+                .SingleOrDefault(s => s.Id == samuraiId);
+
+            if (samurai == null)
+                return NotFound("Samurai ID not found");
+
+            if (samurai.Quotes.Count == 0)
+                return NotFound("Quote ID not found");
+
+            var quoteFromDB = samurai.Quotes
+                .SingleOrDefault(q => q.Id == id);
+
+            if (quote.Text == quoteFromDB.Text || quote.SamuraiId == quoteFromDB.SamuraiId)
             {
                 return BadRequest(
-                    "The ID passed in the URI differs from the ID passed in the request body");
+                    $"[{nameof(quote.Text)}] and [{nameof(quote.SamuraiId)}] values can't be the same as the original ones.");
             }
 
-            if (quote.SamuraiIdHasValue == false)
-            {
-                context.Attach(quote);
-                context.Entry(quote).Property(q => q.Text).IsModified = true;
-                context.SaveChanges();
-                return NoContent();
-            }
+            context.Attach(quoteFromDB);
 
-            return BadRequest(
-                "This resource does not allow change of the samurai who said a quote.");
-        }
+            quoteFromDB.Text = quote.Text;
+            quoteFromDB.SamuraiId = quote.SamuraiId;
 
-        [HttpPut("{id}/{newSamuraiId}")]
-        public ActionResult UpdateSamuraiWhoSaidQuote(int id, int newSamuraiId)
-        {
-            var quote = context.Quotes.Find(id);
-            context.Attach(quote);
-            quote.SamuraiId = newSamuraiId;
             context.SaveChanges();
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteQuote(int id)
+        public ActionResult DeleteQuote(int samuraiId, int id)
         {
-            var quote = context.Quotes.Find(id);
+            var samurai = context.Samurais
+                .Include(q => q.Quotes.Where(q => q.Id == id))
+                .SingleOrDefault(s => s.Id == samuraiId);
 
-            if (quote == null)
-            {
-                return NotFound();
-            }
+            if (samurai == null)
+                return NotFound("Samurai ID not found");
+
+            if (samurai.Quotes.Count == 0)
+                return NotFound("Quote ID not found");
+
+            var quote = samurai.Quotes
+                .SingleOrDefault(q => q.Id == id);
 
             context.Quotes.Remove(quote);
             context.SaveChanges();
@@ -187,10 +176,10 @@ namespace SamuraiApp.Api
                 .ToList();
 
             if (selectedQuotes == null)
-                return NotFound("None of the quote IDs specified exist.");
+                return NotFound("None of the specified quotes exist.");
 
             if (quoteIDs.Count > selectedQuotes.Count)
-                return BadRequest("Not all quote IDs specified exist.");
+                return BadRequest("Not all specified quotes exist.");
 
             context.Quotes.RemoveRange(selectedQuotes);
             context.SaveChanges();
