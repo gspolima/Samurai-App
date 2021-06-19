@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SamuraiApp.Api;
+using SamuraiApp.Api.Repositories;
 using SamuraiApp.Data;
 using SamuraiApp.Domain;
 using System.Linq;
@@ -19,8 +19,8 @@ namespace SamuraiApp.Tests
             context.Samurais.Add(samurai);
             context.SaveChanges();
 
-            var bizLogic = new BusinessLogicData(context);
-            var samuraiRetrieved = bizLogic.GetSamuraiById(samurai.Id);
+            var repo = new SamuraiRepository(context);
+            var samuraiRetrieved = repo.GetSamuraiAsync(samurai.Id);
 
             Assert.Equal(samurai.Id, samuraiRetrieved.Result.Id);
         }

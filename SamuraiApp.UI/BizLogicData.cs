@@ -1,7 +1,7 @@
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using SamuraiApp.Data;
 using SamuraiApp.Domain;
+using System.Linq;
 
 namespace SamuraiApp.UI
 {

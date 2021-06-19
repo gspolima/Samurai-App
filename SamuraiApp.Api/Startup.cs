@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SamuraiApp.Api.Repositories;
 using SamuraiApp.Data;
 
 namespace SamuraiApp.Api
@@ -26,7 +27,7 @@ namespace SamuraiApp.Api
                     Configuration.GetConnectionString("SamuraiConnection"))
                 .EnableSensitiveDataLogging()
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
-            services.AddScoped<BusinessLogicData>();
+            services.AddScoped<SamuraiRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,12 +1,10 @@
-using System;
-using Xunit;
 using Microsoft.EntityFrameworkCore;
 using SamuraiApp.Domain;
-using SamuraiApp.Data;
-using System.Diagnostics;
 using SamuraiApp.UI;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Xunit;
 
 namespace SamuraiApp.Tests
 {
