@@ -1,4 +1,4 @@
-﻿namespace SamuraiApp.Api.Dtos
+﻿namespace SamuraiApp.Api.Dtos.Quotes
 {
     public class QuoteDto
     {
