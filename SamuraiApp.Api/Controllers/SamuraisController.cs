@@ -10,9 +10,9 @@ namespace SamuraiApp.Api
     [ApiController]
     public class SamuraisController : ControllerBase
     {
-        private readonly SamuraiService service;
+        private readonly ISamuraiService service;
 
-        public SamuraisController(SamuraiService service)
+        public SamuraisController(ISamuraiService service)
         {
             this.service = service;
         }
