@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SamuraiApp.Api.Repositories;
+using SamuraiApp.Api.Services;
 using SamuraiApp.Data;
 
 namespace SamuraiApp.Api
@@ -27,7 +28,11 @@ namespace SamuraiApp.Api
                     Configuration.GetConnectionString("SamuraiConnection"))
                 .EnableSensitiveDataLogging()
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
-            services.AddScoped<SamuraiRepository>();
+
+            services.AddScoped<ISamuraiRepository, SamuraiRepository>();
+            services.AddScoped<IQuoteRepository, QuoteRepository>();
+            services.AddScoped<ISamuraiService, SamuraiService>();
+            services.AddScoped<IQuoteService, QuoteService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
