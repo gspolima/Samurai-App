@@ -1,11 +1,15 @@
-﻿using System;
+﻿using SamuraiApp.Domain;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SamuraiApp.Api.Services
 {
-    public class IQuoteService
+    public interface IQuoteService
     {
+        Task<List<Quote>> GetQuotes(int samuraiId);
+        Task<Quote> GetQuoteById(int samuraiId, int quoteId);
+        Task<int> CreateNewQuote(Quote quote);
+        Task<int> UpdateWholeQuote(Quote quote);
+        Task<int> RemoveQuote(Quote quote);
     }
 }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace SamuraiApp.Api.Repositories
 {
-    interface ISamuraiRepository
+    public interface ISamuraiRepository
     {
         Task<List<Samurai>> GetAllSamuraisAsync();
         Task<Samurai> GetSamuraiAsync(int samuraiId);

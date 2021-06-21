@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace SamuraiApp.Api.Services
 {
-    public class SamuraiService
+    public class SamuraiService : ISamuraiService
     {
-        private readonly SamuraiRepository repo;
+        private readonly ISamuraiRepository repo;
 
-        public SamuraiService(SamuraiRepository repo)
+        public SamuraiService(ISamuraiRepository repo)
         {
             this.repo = repo;
         }

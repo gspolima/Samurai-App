@@ -1,21 +1,22 @@
-﻿using SamuraiApp.Domain;
+﻿using SamuraiApp.Api.Repositories;
+using SamuraiApp.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SamuraiApp.Api.Services
 {
-    public class QuoteService
+    public class QuoteService : IQuoteService
     {
-        private readonly QuoteRepository repo;
+        private readonly IQuoteRepository repo;
 
-        public QuoteService(QuoteRepository repo)
+        public QuoteService(IQuoteRepository repo)
         {
             this.repo = repo;
         }
 
-        public async Task<List<Quote>> GetQuotesAsync(int samuraiId)
+        public async Task<List<Quote>> GetQuotes(int samuraiId)
         {
-            var quotes = await repo.GetQuotesAsync(samuraiId);
+            var quotes = await repo.GetAllQuotesAsync(samuraiId);
             return quotes;
         }
 

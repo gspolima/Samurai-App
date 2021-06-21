@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SamuraiApp.Api.Services
+namespace SamuraiApp.Api.Repositories
 {
-    public class QuoteRepository
+    public class QuoteRepository : IQuoteRepository
     {
         private readonly SamuraiContext context;
 
@@ -16,7 +16,7 @@ namespace SamuraiApp.Api.Services
             this.context = context;
         }
 
-        public async Task<List<Quote>> GetQuotesAsync(int samuraiId)
+        public async Task<List<Quote>> GetAllQuotesAsync(int samuraiId)
         {
             var quotes = await context.Quotes
                 .Where(q => q.SamuraiId == samuraiId)
