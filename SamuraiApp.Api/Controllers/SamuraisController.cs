@@ -37,6 +37,13 @@ namespace SamuraiApp.Api
             return Ok(samurai);
         }
 
+        [HttpGet("with/horse")]
+        public async Task<ActionResult<int>> GetFirstThreeSamuraisWithHorse()
+        {
+            var count = await service.TopThreeSamuraisWithHorse();
+            return Ok(count);
+        }
+
         [HttpGet("noquote")]
         public ActionResult SamuraisWithNoQuote()
         {

@@ -25,6 +25,12 @@ namespace SamuraiApp.Api.Services
             var samurai = await repo.GetSamuraiAsync(samuraiId);
             return samurai;
         }
+ 
+        public async Task<IEnumerable<Samurai>> TopThreeSamuraisWithHorse()
+        {
+            var samurais = await repo.GetThreeSamuraisWithHorseAsync();
+            return samurais;
+        }
 
         public async Task<List<Samurai>> GetSamuraisByWordSpoken(string word)
         {

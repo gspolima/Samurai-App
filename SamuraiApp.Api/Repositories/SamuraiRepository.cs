@@ -2,6 +2,7 @@
 using SamuraiApp.Data;
 using SamuraiApp.Domain;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SamuraiApp.Api.Repositories
@@ -25,6 +26,18 @@ namespace SamuraiApp.Api.Repositories
         {
             var samurai = await context.Samurais.FindAsync(samuraiId);
             return samurai;
+        }
+
+        public async Task<IEnumerable<Samurai>> GetThreeSamuraisWithHorseAsync()
+        {
+            var samurais = await context.Samurais
+                .Include(s => s.Horse)
+                .Where(s => s.Horse != null)
+                .Take(3)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+
+            return samurais;
         }
 
         public async Task<List<Samurai>> GetSamuraisByTerm(string term)

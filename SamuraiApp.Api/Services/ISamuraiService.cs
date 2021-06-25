@@ -8,6 +8,7 @@ namespace SamuraiApp.Api.Services
     {
         Task<List<Samurai>> GetSamurais();
         Task<Samurai> GetSamuraiById(int samuraiId);
+        Task<IEnumerable<Samurai>> TopThreeSamuraisWithHorse();
         Task<List<Samurai>> GetSamuraisByWordSpoken(string word);
         Task<int> CreateNewSamurai(Samurai samurai);
         Task<int> UpdateWholeSamuraiAsync(Samurai samurai);
